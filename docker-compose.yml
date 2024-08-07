@@ -1,0 +1,36 @@
+services:
+  # NestJS Threads API
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: ./threads-api
+      # Only build develpment stage our dockerfile
+      target: development
+    volumes:
+      - ./threads-api:/les/src/app
+      - /les/src/app/node_modules/
+    # Dev mode: npm run start:dev / Debug: npm run start:debug
+    command: npm run start:dev
+    environment:
+      DATABASE_URL: ${DB_URL}
+    ports:
+      - 3000:3000
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - ${DB_PORT}:5432
+
+  postgres_admin:
+    image: dpage/pgadmin4:6.12
+    depends_on:
+      - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASS}
+    ports:
+      - ${PGADMIN_PORT}:80
